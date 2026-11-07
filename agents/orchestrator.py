@@ -5,13 +5,16 @@ from services.speech_to_text import transcribe_patient_voice
 from services.text_to_speech import convert_text_to_doctor_audio
 
 
-def run_consultation(audio_filepath, image_filepath, video_filepath):
+def run_consultation(audio_filepath, image_filepath, video_filepath, output_audio_filepath=None):
     patient_text = transcribe_patient_voice(audio_filepath)
     doctor_text = brain_of_the_doctor(
         patient_text=patient_text,
         image_filepath=image_filepath,
         video_filepath=video_filepath,
     )
-    doctor_audio = convert_text_to_doctor_audio(doctor_text)
+    if output_audio_filepath is None:
+        doctor_audio = convert_text_to_doctor_audio(doctor_text)
+    else:
+        doctor_audio = convert_text_to_doctor_audio(doctor_text, output_filepath=output_audio_filepath)
 
     return patient_text, doctor_text, str(Path(doctor_audio))

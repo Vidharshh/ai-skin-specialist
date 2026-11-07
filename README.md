@@ -5,6 +5,8 @@ AI Skin Specialist is a Gradio-based consultation assistant that accepts a patie
 The current app uses:
 
 - Gradio for the web interface.
+- FastAPI and Uvicorn for the backend API.
+- HTTPX and `python-multipart` for file uploads between the interface and API.
 - Groq Whisper for patient voice transcription.
 - Groq vision model for image-based skin guidance.
 - Deepgram text-to-speech for the doctor audio response.
@@ -16,6 +18,10 @@ Important: this project provides general informational guidance only. It is not 
 
 ```text
 ai-skin-specialist/
+|-- backend/
+|   |-- api/consultations.py    # Consultation upload endpoint
+|   |-- main.py                 # FastAPI application
+|   `-- schemas/consultation.py # API response model
 |-- agents/
 |   |-- orchestrator.py          # Coordinates the current consultation flow
 |   |-- vision_agent.py          # Groq image and text analysis
@@ -217,19 +223,21 @@ Do not commit real API keys to version control.
 
 ## Run the App
 
-Use `uv run` so the command executes inside the project environment:
+Run the API and Gradio interface in two terminal windows from the project root.
+
+Terminal 1, start the backend API:
+
+```bash
+uv run uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Terminal 2, start the Gradio interface:
 
 ```bash
 uv run python -m frontend.app
 ```
 
-Gradio will print a local URL, usually:
-
-```text
-http://127.0.0.1:7860
-```
-
-Open that URL in your browser.
+Open `http://127.0.0.1:7860` in your browser. The API health check is at `http://127.0.0.1:8000/health`.
 
 ## How to Use
 
@@ -247,7 +255,10 @@ Common commands for this project:
 # Create/update the virtual environment from pyproject.toml and uv.lock
 uv sync
 
-# Run the Gradio app
+# Run the backend API (in one terminal)
+uv run uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+
+# Run the Gradio app (in a second terminal)
 uv run python -m frontend.app
 
 # Run the standalone text-to-speech experiment
@@ -306,6 +317,8 @@ deactivate
 The main dependencies are listed in `pyproject.toml`:
 
 - `gradio` for the web app.
+- `fastapi` and `uvicorn` for the backend API.
+- `httpx` and `python-multipart` for the interface-to-API upload.
 - `groq` for Whisper transcription and the vision/chat model.
 - `deepgram-sdk` for text-to-speech.
 - `anthropic` for the alternate MiniMax-compatible implementation.
@@ -318,7 +331,9 @@ Because this project includes `uv.lock`, prefer `uv sync` over `pip install -r r
 
 ## Development Notes
 
-- `frontend/app.py` defines the Gradio interface and calls `agents/orchestrator.py` for each consultation.
+- `frontend/app.py` defines the Gradio interface and sends uploads to `backend/api/consultations.py`.
+- `backend/api/consultations.py` calls `agents/orchestrator.py` and returns the transcript, guidance, and generated audio.
+- `backend/main.py` exposes the API and a `/health` endpoint.
 - `agents/vision_agent.py` requires an image input. If only a video is uploaded, the app validation passes, but Groq vision will raise an error because no image was provided.
 - `agents/vision_agent_minimax.py` contains an alternate MiniMax/Anthropic-compatible path that can encode either image or video, but it is not used by the current app.
 - Generated consultation audio is written to `outputs/doctor_response.mp3` by default.

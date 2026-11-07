@@ -1,6 +1,12 @@
-import gradio as gr
+import base64
+from contextlib import ExitStack
+import mimetypes
+import os
+from pathlib import Path
+import uuid
 
-from agents.orchestrator import run_consultation
+import gradio as gr
+import httpx
 
 
 APP_TITLE = "AI Skin Specialist"
@@ -448,14 +454,65 @@ CSS = """
 """
 
 
+BACKEND_API_URL = os.environ.get("BACKEND_API_URL", "http://127.0.0.1:8000").rstrip("/")
+
+
+def _local_media_path(value):
+    if isinstance(value, dict):
+        return value.get("path") or value.get("video")
+    return value
+
+
+def _upload_part(filepath, open_files):
+    path = Path(filepath)
+    if not path.is_file():
+        raise gr.Error("One of the selected uploads could not be found. Please choose it again.")
+    file_handle = open_files.enter_context(path.open("rb"))
+    content_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    return path.name, file_handle, content_type
+
+
 def process_inputs(audio_filepath, image_filepath, video_filepath):
     if not audio_filepath:
         raise gr.Error("Please record or upload your voice description first.")
 
+    image_filepath = _local_media_path(image_filepath)
+    video_filepath = _local_media_path(video_filepath)
     if not image_filepath and not video_filepath:
         raise gr.Error("Please upload a skin image or video before analysis.")
 
-    return run_consultation(audio_filepath, image_filepath, video_filepath)
+    with ExitStack() as open_files:
+        uploads = {"audio": _upload_part(audio_filepath, open_files)}
+        if image_filepath:
+            uploads["image"] = _upload_part(image_filepath, open_files)
+        if video_filepath:
+            uploads["video"] = _upload_part(video_filepath, open_files)
+
+        try:
+            response = httpx.post(
+                f"{BACKEND_API_URL}/api/consultations",
+                files=uploads,
+                timeout=300.0,
+            )
+        except httpx.RequestError as error:
+            raise gr.Error(
+                "Could not reach the backend API. Start it in another terminal and try again."
+            ) from error
+
+    if response.is_error:
+        try:
+            detail = response.json().get("detail", response.text)
+        except ValueError:
+            detail = response.text
+        raise gr.Error(str(detail))
+
+    result = response.json()
+    output_directory = Path(__file__).resolve().parents[1] / "outputs"
+    output_directory.mkdir(parents=True, exist_ok=True)
+    audio_path = output_directory / f"doctor-response-{uuid.uuid4().hex}.mp3"
+    audio_path.write_bytes(base64.b64decode(result["audio_base64"], validate=True))
+
+    return result["transcript"], result["guidance"], str(audio_path)
 
 
 with gr.Blocks(title=APP_TITLE) as iface:
