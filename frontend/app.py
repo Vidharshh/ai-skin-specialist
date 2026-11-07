@@ -570,7 +570,7 @@ with gr.Blocks(title=APP_TITLE) as iface:
                         """
                         <div class="ais-note">
                             <span class="ais-icon">info</span>
-                            <span>For better assessment, include a short video showing the affected area from multiple angles and under good lighting.</span>
+                            <span>For video input, use a well-lit clip up to 60 seconds. We sample up to three frames; a still image can provide clearer detail.</span>
                         </div>
                         """
                     )

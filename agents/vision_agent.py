@@ -9,28 +9,54 @@ from services.image_processing import encode_image_for_groq
 load_dotenv()
 
 
-def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
+def brain_of_the_doctor(patient_text, image_filepaths, frame_timestamps=None):
     groq_api_key = os.environ.get("GROQ_API_KEY")
     if not groq_api_key:
         raise ValueError("Missing GROQ_API_KEY in .env or environment")
+    if not image_filepaths:
+        raise ValueError("Please upload a skin image or video before analysis.")
+    if len(image_filepaths) > 3:
+        raise ValueError(
+            "The current Groq vision model accepts up to three images per request."
+        )
 
-    if not image_filepath:
-        raise ValueError("Groq vision requires an image. Please upload a skin image.")
+    frame_timestamps = frame_timestamps or [None] * len(image_filepaths)
+    if len(frame_timestamps) != len(image_filepaths):
+        raise ValueError("Each visual input must have a matching timestamp entry.")
 
-    # Groq vision does not accept video here. When the app passes both image and
-    # video, this uses the same image as the visual input and ignores the video.
-    image_data = encode_image_for_groq(image_filepath)
+    visual_descriptions = []
+    for index, timestamp in enumerate(frame_timestamps, start=1):
+        if timestamp is None:
+            visual_descriptions.append(f"Visual {index}: uploaded still image")
+        else:
+            visual_descriptions.append(
+                f"Visual {index}: video frame at approximately {timestamp:.1f} seconds"
+            )
 
     prompt = (
-        "You are a confident, natural doctor specializing in skin care. Speak with the reassurance, clarity, and authority of a real doctor. "
-        "Limit your entire response to two or three sentences maximum. "
-        "If the patient has provided a video, explain that you are reviewing the uploaded image because this model cannot process video directly. "
-        "Do not use any special characters, symbols, asterisks, or markdown formatting in your response because it will be converted directly to audio.\n\n"
-        f"Patient text: {patient_text}"
+        "You are a careful skin care assistant. Give general information, not a "
+        "diagnosis. Keep the response to two or three sentences. Do not claim that "
+        "an image proves a diagnosis. Do not use markdown because the response will "
+        "be converted to speech.\n\n"
+        f"Patient description: {patient_text}\n\n"
+        "Review the provided skin image or video frames. Describe visible features "
+        "cautiously. These are still images, including sampled video frames; do not "
+        "infer movement or events between frames.\n\n"
+        + "\n".join(visual_descriptions)
     )
 
-    if video_filepath:
-        prompt += "\nThe patient also uploaded a video, but use the provided image as the visual reference."
+    image_data = [
+        encode_image_for_groq(filepath) for filepath in image_filepaths
+    ]
+
+    message_content = [{"type": "text", "text": prompt}]
+    message_content.extend(
+        {
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"},
+        }
+        for encoded_image in image_data
+    )
 
     client = Groq(api_key=groq_api_key)
     response = client.chat.completions.create(
@@ -39,80 +65,13 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
         messages=[
             {
                 "role": "system",
-                "content": "You are a careful skin care assistant. Give general information, not a diagnosis.",
+                "content": (
+                    "You are a careful skin care assistant. Provide general "
+                    "information, not a medical diagnosis."
+                ),
             },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{image_data}",
-                        },
-                    },
-                ],
-            },
+            {"role": "user", "content": message_content},
         ],
     )
 
     return response.choices[0].message.content
-
-
-# OLD CODE KEPT FOR REFERENCE
-# import base64
-# import os
-# from io import BytesIO
-#
-# from dotenv import load_dotenv
-# from groq import Groq
-# from PIL import Image
-#
-#
-# folder = os.path.dirname(__file__)
-# env_path = os.path.join(folder, ".env")
-# load_dotenv(env_path)
-#
-# api_key = os.environ.get("GROQ_API_KEY")
-# if not api_key:
-#     raise ValueError("Missing GROQ_API_KEY in .env or environment")
-#
-#
-# image_path = os.path.join(folder, "sample-image.png")
-#
-# image = Image.open(image_path)
-# image.thumbnail((1024, 1024))
-#
-# buffer = BytesIO()
-# image.convert("RGB").save(buffer, format="JPEG", quality=75)
-# image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
-#
-# client = Groq(api_key=api_key)
-#
-# response = client.chat.completions.create(
-#     model=os.environ.get("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
-#     max_completion_tokens=1000,
-#     messages=[
-#         {
-#             "role": "system",
-#             "content": "You are a helpful medical assistant. Give general information, not a diagnosis.",
-#         },
-#         {
-#             "role": "user",
-#             "content": [
-#                 {
-#                     "type": "text",
-#                     "text": "What do you see in this image? Give general skin care advice, not a diagnosis.",
-#                 },
-#                 {
-#                     "type": "image_url",
-#                     "image_url": {
-#                         "url": f"data:image/jpeg;base64,{image_data}",
-#                     },
-#                 },
-#             ],
-#         },
-#     ],
-# )
-#
-# print(response.choices[0].message.content)

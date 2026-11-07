@@ -8,6 +8,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from agents.orchestrator import run_consultation
 from backend.schemas.consultation import ConsultationResponse
+from services.video_processing import VideoProcessingError
 
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,9 @@ def create_consultation(
                 output_audio_filepath=response_audio_path,
             )
             audio_bytes = Path(generated_audio_path).read_bytes()
+        except VideoProcessingError as error:
+            logger.info("Video upload rejected: %s", error)
+            raise HTTPException(status_code=400, detail=str(error)) from error
         except Exception as error:
             logger.exception("Consultation processing failed")
             raise HTTPException(
