@@ -32,6 +32,9 @@ ai-skin-specialist/
 |-- data/
 |   |-- sample_inputs/           # Example image, audio, and video inputs
 |   `-- sample_outputs/          # Example generated audio files
+|-- evaluation/
+|   |-- retrieval_tests.py       # Offline local retrieval checks
+|   `-- safety_tests.py          # Checks required safety prompt rules
 |-- experiments/
 |   `-- free_text_to_speech.py   # Standalone gTTS experiment
 |-- frontend/
@@ -348,6 +351,16 @@ Because this project includes `uv.lock`, prefer `uv sync` over `pip install -r r
 - `agents/vision_agent_minimax.py` is an alternate provider implementation and is not used by the current app.
 - Generated consultation audio is written under `outputs/`; citation markers are omitted from speech.
 - Gradio launches with `debug=True` in `frontend/app.py`.
+
+## Offline Evaluation
+
+Run the local retrieval and safety-prompt checks without calling Groq or Deepgram:
+
+```bash
+uv run python -B -m unittest evaluation.retrieval_tests evaluation.safety_tests -v
+```
+
+These checks verify keyword ranking and the presence of safety instructions in the prompt. They do not validate clinical accuracy or guarantee that a generated response follows those instructions.
 
 ## Troubleshooting
 

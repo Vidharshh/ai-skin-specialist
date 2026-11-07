@@ -6,6 +6,24 @@ from services.image_processing import encode_image_for_groq
 
 
 
+VISION_SYSTEM_PROMPT = (
+    "You provide general skin health information, not medical care. Do not "
+    "diagnose, rank likely conditions, or identify a condition from an image. "
+    "Describe only visible features; do not infer texture, pain, warmth, duration, "
+    "or change over time from an image. If uncertain, say so. Do not promise a "
+    "mark or scar can be removed, and do not recommend a specific procedure or "
+    "treatment based only on an image. For questions about treating or removing "
+    "a mark, recommend an in-person dermatologist or clinician assessment before "
+    "choosing treatment. If the patient reports fever or chills together with "
+    "painful, red, tender skin, recommend prompt clinical assessment. If the "
+    "patient reports trouble breathing or swelling of the face or throat, advise "
+    "calling local emergency services immediately. For severe or rapidly worsening "
+    "symptoms, advise seeking urgent local medical care. "
+    "Use retrieved reference notes only when they directly support general "
+    "information, and cite those notes by their bracketed numbers."
+)
+
+
 def brain_of_the_doctor(
     patient_text, image_filepaths, frame_timestamps=None, knowledge_context=None
 ):
@@ -75,25 +93,7 @@ def brain_of_the_doctor(
         model=settings.groq_model,
         max_completion_tokens=1000,
         messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You provide general skin health information, not medical care. Do not "
-                    "diagnose, rank likely conditions, or identify a condition from an image. "
-                    "Describe only visible features; do not infer texture, pain, warmth, duration, "
-                    "or change over time from an image. If uncertain, say so. Do not promise a "
-                    "mark or scar can be removed, and do not recommend a specific procedure or "
-                    "treatment based only on an image. For questions about treating or removing "
-                    "a mark, recommend an in-person dermatologist or clinician assessment before "
-                    "choosing treatment. If the patient reports fever or chills together with "
-                    "painful, red, tender skin, recommend prompt clinical assessment. If the "
-                    "patient reports trouble breathing or swelling of the face or throat, advise "
-                    "calling local emergency services immediately. For severe or rapidly worsening "
-                    "symptoms, advise seeking urgent local medical care. "
-                    "Use retrieved reference notes only when they directly support general "
-                    "information, and cite those notes by their bracketed numbers."
-                ),
-            },
+            {"role": "system", "content": VISION_SYSTEM_PROMPT},
             {"role": "user", "content": message_content},
         ],
     )
