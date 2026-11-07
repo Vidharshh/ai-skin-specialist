@@ -1,22 +1,12 @@
-import base64
 import os
-from io import BytesIO
 
 from dotenv import load_dotenv
 from groq import Groq
-from PIL import Image
+
+from services.image_processing import encode_image_for_groq
 
 
 load_dotenv()
-
-
-def encode_image_for_groq(filepath):
-    image = Image.open(filepath)
-    image.thumbnail((1024, 1024))
-
-    buffer = BytesIO()
-    image.convert("RGB").save(buffer, format="JPEG", quality=75)
-    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 
 def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
@@ -27,7 +17,7 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
     if not image_filepath:
         raise ValueError("Groq vision requires an image. Please upload a skin image.")
 
-    # Groq vision does not accept video here. When main.py passes both image and
+    # Groq vision does not accept video here. When the app passes both image and
     # video, this uses the same image as the visual input and ignores the video.
     image_data = encode_image_for_groq(image_filepath)
 

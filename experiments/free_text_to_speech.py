@@ -1,3 +1,4 @@
+from pathlib import Path
 import subprocess
 import platform
 from gtts import gTTS
@@ -11,7 +12,8 @@ def text_to_speech_with_gtts(input_text, output_filepath):
         lang=language,
         slow=False
     )
-    audioobj.save(output_filepath)
+    Path(output_filepath).parent.mkdir(parents=True, exist_ok=True)
+    audioobj.save(str(output_filepath))
     os_name = platform.system()
     try:
         if os_name == "Darwin":  # macOS
@@ -26,5 +28,5 @@ def text_to_speech_with_gtts(input_text, output_filepath):
         print(f"An error occurred while trying to play the audio: {e}")
 
 input_text = "Hello, this is a test of the text-to-speech functionality. My name is AI with Hassan"
-output_filepath = "output_gtts.mp3"
+output_filepath = Path(__file__).resolve().parents[1] / "outputs" / "output_gtts.mp3"
 text_to_speech_with_gtts(input_text, output_filepath)

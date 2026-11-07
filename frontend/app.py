@@ -1,11 +1,6 @@
-from pathlib import Path
-
 import gradio as gr
 
-#from brain_of_the_doctor import brain_of_the_doctor
-from brain_of_the_doctor_groq import brain_of_the_doctor
-from voice_of_the_doctor import convert_text_to_doctor_audio
-from voice_of_the_patient import transcribe_patient_voice
+from agents.orchestrator import run_consultation
 
 
 APP_TITLE = "AI Skin Specialist"
@@ -460,15 +455,7 @@ def process_inputs(audio_filepath, image_filepath, video_filepath):
     if not image_filepath and not video_filepath:
         raise gr.Error("Please upload a skin image or video before analysis.")
 
-    patient_text = transcribe_patient_voice(audio_filepath)
-    doctor_text = brain_of_the_doctor(
-        patient_text=patient_text,
-        image_filepath=image_filepath,
-        video_filepath=video_filepath,
-    )
-    doctor_audio = convert_text_to_doctor_audio(doctor_text)
-
-    return patient_text, doctor_text, str(Path(doctor_audio))
+    return run_consultation(audio_filepath, image_filepath, video_filepath)
 
 
 with gr.Blocks(title=APP_TITLE) as iface:

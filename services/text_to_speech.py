@@ -7,8 +7,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_DOCTOR_AUDIO = BASE_DIR / "doctor_response.mp3"
+BASE_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_DOCTOR_AUDIO = BASE_DIR / "outputs" / "doctor_response.mp3"
 def convert_text_to_doctor_audio(text, output_filepath=DEFAULT_DOCTOR_AUDIO):
     deepgram_api_key = os.environ.get("DEEPGRAM_API_KEY")
     deepgram = DeepgramClient(api_key=deepgram_api_key)
@@ -19,6 +19,7 @@ def convert_text_to_doctor_audio(text, output_filepath=DEFAULT_DOCTOR_AUDIO):
     )
 
     output_filepath = Path(output_filepath)
+    output_filepath.parent.mkdir(parents=True, exist_ok=True)
     with output_filepath.open("wb") as file:
         for chunk in audio:
             file.write(chunk)
