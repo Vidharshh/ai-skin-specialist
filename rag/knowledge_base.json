@@ -1,0 +1,70 @@
+{
+  "attribution": "Source: MedlinePlus, National Library of Medicine. This starter set paraphrases the public-domain summaries on the linked MedlinePlus health-topic pages.",
+  "license_note": "Only MedlinePlus health-topic summaries are represented here. Exclude Medical Encyclopedia articles, licensed drug content, and images unless separately licensed.",
+  "documents": [
+    {
+      "id": "medlineplus-scars",
+      "title": "Scars",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/scars.html",
+      "content_type": "health-topic-summary",
+      "text": "A scar forms as skin heals after an injury or skin condition. Scars may differ in thickness, color, or shine from nearby skin. Their appearance depends on factors such as wound size and depth, location, and healing time. Scars often fade but usually do not disappear completely; a health professional can discuss options to reduce their appearance."
+    },
+    {
+      "id": "medlineplus-acne",
+      "title": "Acne",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/acne.html",
+      "content_type": "health-topic-summary",
+      "text": "Acne is a common skin condition in which hair follicles become clogged and pimples form. It can affect people of different ages and may lead to scars. Gentle skin care and avoiding picking or touching spots may help; treatments can include medicines or creams, so a clinician can advise on options."
+    },
+    {
+      "id": "medlineplus-eczema",
+      "title": "Eczema",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/eczema.html",
+      "content_type": "health-topic-summary",
+      "text": "Eczema describes several types of skin inflammation. Many types cause dry, itchy skin and rashes. Eczema is not contagious and may be long lasting, with symptoms that change over time. Irritants can worsen some types; a health professional can advise on care and treatment."
+    },
+    {
+      "id": "medlineplus-cellulitis",
+      "title": "Cellulitis",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/cellulitis.html",
+      "content_type": "health-topic-summary",
+      "text": "Cellulitis is an infection involving the skin and deeper tissues. Warning signs can include fever or chills and painful, red, tender skin. Suspected cellulitis needs prompt assessment by a health professional; treatment may require prescription antibiotics."
+    },
+    {
+      "id": "medlineplus-psoriasis",
+      "title": "Psoriasis",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/psoriasis.html",
+      "content_type": "health-topic-summary",
+      "text": "Psoriasis is a long-lasting skin disease that can cause itchy or sore thick patches with scales. Symptoms can come and go, and psoriasis can resemble other skin conditions, so a health professional may need to assess it."
+    },
+    {
+      "id": "medlineplus-rosacea",
+      "title": "Rosacea",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/rosacea.html",
+      "content_type": "health-topic-summary",
+      "text": "Rosacea is a long-term condition that can affect the skin and sometimes the eyes. It may cause facial redness or flushing and acne-like bumps. Symptoms can vary, and a health professional can assess the concern and discuss care."
+    },
+    {
+      "id": "medlineplus-hives",
+      "title": "Hives",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/hives.html",
+      "content_type": "health-topic-summary",
+      "text": "Hives are red, sometimes itchy bumps that can have several causes, including allergic reactions, infections, or stress. They often go away on their own, but swelling that makes breathing difficult is a medical emergency requiring immediate help."
+    },
+    {
+      "id": "medlineplus-rashes",
+      "title": "Rashes",
+      "source": "MedlinePlus, National Library of Medicine",
+      "source_url": "https://medlineplus.gov/rashes.html",
+      "content_type": "health-topic-summary",
+      "text": "A rash is irritated or swollen skin and can have many different causes, including irritants and allergies. Different problems can look similar, so the type should be assessed before treatment. Seek a health professional for a severe or persistent rash, or if other symptoms occur."
+    }
+  ]
+}

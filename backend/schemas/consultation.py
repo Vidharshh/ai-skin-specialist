@@ -1,4 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class SourceReference(BaseModel):
+    title: str
+    source: str
+    source_url: str
 
 
 class ConsultationResponse(BaseModel):
@@ -6,3 +12,4 @@ class ConsultationResponse(BaseModel):
     guidance: str
     audio_base64: str
     audio_content_type: str = "audio/mpeg"
+    sources: list[SourceReference] = Field(default_factory=list)

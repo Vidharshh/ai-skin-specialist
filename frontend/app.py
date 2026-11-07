@@ -1,12 +1,13 @@
 import base64
 from contextlib import ExitStack
 import mimetypes
-import os
 from pathlib import Path
 import uuid
 
 import gradio as gr
 import httpx
+
+from config import settings
 
 
 APP_TITLE = "AI Skin Specialist"
@@ -454,7 +455,7 @@ CSS = """
 """
 
 
-BACKEND_API_URL = os.environ.get("BACKEND_API_URL", "http://127.0.0.1:8000").rstrip("/")
+BACKEND_API_URL = settings.backend_api_url
 
 
 def _local_media_path(value):
@@ -512,7 +513,21 @@ def process_inputs(audio_filepath, image_filepath, video_filepath):
     audio_path = output_directory / f"doctor-response-{uuid.uuid4().hex}.mp3"
     audio_path.write_bytes(base64.b64decode(result["audio_base64"], validate=True))
 
-    return result["transcript"], result["guidance"], str(audio_path)
+    guidance = result["guidance"]
+    sources = result.get("sources", [])
+    cited_sources = [
+        (index, source)
+        for index, source in enumerate(sources, start=1)
+        if f"[{index}]" in guidance
+    ]
+    if cited_sources:
+        source_lines = [
+            f"[{index}] {source['title']} — {source['source']}: {source['source_url']}"
+            for index, source in cited_sources
+        ]
+        guidance += "\n\nSources (MedlinePlus, National Library of Medicine):\n" + "\n".join(source_lines)
+
+    return result["transcript"], guidance, str(audio_path)
 
 
 with gr.Blocks(title=APP_TITLE) as iface:

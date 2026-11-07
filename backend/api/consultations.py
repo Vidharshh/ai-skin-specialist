@@ -40,7 +40,7 @@ def create_consultation(
         response_audio_path = work_directory / "doctor-response.mp3"
 
         try:
-            transcript, guidance, generated_audio_path = run_consultation(
+            transcript, guidance, generated_audio_path, sources = run_consultation(
                 str(audio_path),
                 str(image_path) if image_path else None,
                 str(video_path) if video_path else None,
@@ -61,4 +61,5 @@ def create_consultation(
         transcript=transcript,
         guidance=guidance,
         audio_base64=b64encode(audio_bytes).decode("ascii"),
+        sources=sources,
     )

@@ -41,19 +41,18 @@ audio_filepath="patient_voice_test.mp3"
 
 # Step2: Convert audio to text
 from groq import Groq
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from config import settings
 
 def transcribe_patient_voice(audio_filepath):
-    groq_api_key = os.environ.get("GROQ_API_KEY")
+    groq_api_key = settings.groq_api_key
+    if not groq_api_key:
+        raise ValueError("Missing GROQ_API_KEY in .env or environment")
 
     client = Groq(api_key=groq_api_key)
     with open(audio_filepath, "rb") as audio_file:
         transcription = client.audio.transcriptions.create(
             file=audio_file,
-            model=os.environ.get("WHISPER_MODEL", "whisper-large-v3"),
+            model=settings.whisper_model,
         )
 
     return transcription.text

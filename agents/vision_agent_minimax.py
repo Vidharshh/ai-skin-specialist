@@ -1,12 +1,9 @@
 # Step1: Install and import dependencies
 import anthropic
-from dotenv import load_dotenv
-import os
+from config import settings
 import base64
 import mimetypes
 # Step2: Create API keys & Client
-
-load_dotenv()
 
 
 def encode_file(filepath):
@@ -21,7 +18,7 @@ def get_media_type(filepath, fallback):
 
 def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
 
-    minimax_api_key = os.environ.get("MINIMAX_API_KEY")
+    minimax_api_key = settings.minimax_api_key
 
     prompt = (
     "You are a confident, natural doctor specializing in skin care. Speak with the reassurance, clarity, and authority of a real doctor. "
@@ -52,10 +49,10 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
 
     client = anthropic.Anthropic(
         api_key=minimax_api_key,
-        base_url=os.environ.get("MINIMAX_BASE_URL", "https://api.minimax.io/anthropic"),
+        base_url=settings.minimax_base_url,
     )
     response = client.messages.create(
-        model=os.environ.get("MINIMAX_MODEL", "MiniMax-M3"),
+        model=settings.minimax_model,
         max_tokens=1000,
         messages=[
             {
@@ -70,7 +67,7 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
     return doctors_response_in_text
 
 
-"""api_key=os.environ.get("MINIMAX_API_KEY")
+"""api_key=settings.minimax_api_key
 base_url="https://api.minimax.io/anthropic"
 
 client = anthropic.Anthropic(api_key=api_key, base_url=base_url)
